@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realtime Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    fieldset {
+      margin: 20px auto;
+      padding: 20px;
+      width: 80%;
+      max-width: 600px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    legend {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #messages {
+      list-style-type: none;
+      padding: 0;
+      margin: 10px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+      margin-bottom: 5px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+    }
+
+    #form {
+      text-align: center;
+    }
+
+    #input {
+      padding: 5px;
+      width: 30%;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 5px 10px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 3px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+  </style>
+</head>
+<body>
+  <fieldset>
+    <legend>Chat Room</legend>
+    <ul id="messages"></ul>
+  </fieldset>
+  <form id="form" action="">
+    <input id="name" value="[NAME]" hidden required><br>
+    <input id="input" autocomplete="off">
+    <button>Send</button>
+  </form>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const name = document.getElementById('name');
+    const messages = document.getElementById('messages');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (input.value) {
+        var message = `${name.value} : ${input.value}`;
+        socket.emit('message', message);
+        input.value = '';
+      }
+    });
+
+    socket.on('messageHistory', (history) => {
+      history.forEach((message) => {
+        const item = document.createElement('li');
+        item.textContent = message;
+        messages.appendChild(item);
+        messages.scrollTop = messages.scrollHeight;
+      });
+    });
+
+    socket.on('message', (message) => {
+      const item = document.createElement('li');
+      item.textContent = message;
+      messages.appendChild(item);
+      messages.scrollTop = messages.scrollHeight;
+    });
+  </script>
+</body>
+</html>
